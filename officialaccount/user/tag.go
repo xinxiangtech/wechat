@@ -18,6 +18,12 @@ const (
 	tagUserTidListURL    = "https://api.weixin.qq.com/cgi-bin/tags/getidlist?access_token=%s"
 )
 
+//中文
+var errMsgMap = map[int64]string {
+	int64(45157) : "标签名非法，请注意不能和其他标签重名",
+	int64(45158) : "标签字数可不长于6个汉字或12个字符",
+}
+
 //TagInfo 标签信息
 type TagInfo struct {
 	ID    int32  `json:"id"`
@@ -32,6 +38,14 @@ type TagOpenIDList struct {
 		OpenIDs []string `json:"openid"`
 	} `json:"data"`
 	NextOpenID string `json:"next_openid"`
+}
+
+func getMsgDesc(msgDescMap *map[int64]string, errno int64) string {
+	if val, ok := errMsgMap[errno]; ok {
+		return val
+	} else {
+		return "未知错误"
+	}
 }
 
 //CreateTag 创建标签
@@ -62,7 +76,8 @@ func (user *User) CreateTag(tagName string) (tagInfo *TagInfo, err error) {
 		return
 	}
 	if result.ErrCode != 0 {
-		err = fmt.Errorf("CreateTag Error , errcode=%d , errmsg=%s", result.ErrCode, result.ErrMsg)
+		//err = fmt.Errorf("CreateTag Error , errcode=%d , errmsg=%s", result.ErrCode, result.ErrMsg)
+		err = fmt.Errorf(getMsgDesc(&errMsgMap, result.ErrCode))
 		return
 	}
 	return result.Tag, nil
