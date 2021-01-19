@@ -11,6 +11,7 @@ import (
 const (
 	templateSendURL = "https://api.weixin.qq.com/cgi-bin/message/template/send"
 	templateListURL = "https://api.weixin.qq.com/cgi-bin/template/get_all_private_template"
+	templateDelURL = "https://api.weixin.qq.com/cgi-bin/template/del_private_template"
 )
 
 //Template 模板消息
@@ -111,5 +112,35 @@ func (tpl *Template) List() (templateList []*TemplateItem, err error) {
 		return
 	}
 	templateList = res.TemplateList
+	return
+}
+
+func (tpl *Template) Del(tplId string) (err error) {
+	var accessToken string
+	accessToken, err = tpl.GetAccessToken()
+	if err != nil {
+		return
+	}
+	uri := fmt.Sprintf("%s?access_token=%s", templateDelURL, accessToken)
+
+        reqBody := map[string]string {
+            "template_id" : tplId,
+        }
+	response, err := util.PostJSON(uri, reqBody)
+	if err != nil {
+	    return
+	}
+	var result struct {
+	    util.CommonError
+	}
+
+	err = json.Unmarshal(response, &result)
+	if err != nil {
+		return
+	}
+	if result.ErrCode != 0 {
+		err = fmt.Errorf("template msg del error : errcode=%v , errmsg=%v", result.ErrCode, result.ErrMsg)
+		return
+	}
 	return
 }
