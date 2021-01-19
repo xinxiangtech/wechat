@@ -55,6 +55,11 @@ func (r *Redis) SetConn(conn *redis.Pool) {
 	r.conn = conn
 }
 
+//GetConn
+func (r *Redis) GetConn() (*redis.Pool) {
+	return r.conn
+}
+
 //Get 获取一个值
 func (r *Redis) Get(key string) interface{} {
 	conn := r.conn.Get()
